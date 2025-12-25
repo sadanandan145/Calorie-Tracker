@@ -51,6 +51,7 @@ const MEAL_LABELS: Record<string, string> = {
 export default function DailyView() {
   const [match, params] = useRoute("/day/:date");
   const [, setLocation] = useLocation();
+  const [weightInput, setWeightInput] = useState("");
   const dateStr = params?.date || format(new Date(), "yyyy-MM-dd");
   
   const { data: day, isLoading, error } = useDay(dateStr);
@@ -63,6 +64,15 @@ export default function DailyView() {
       createDay.mutate(dateStr);
     }
   }, [day, isLoading, dateStr]);
+
+  // Update weight input when day data changes
+  useEffect(() => {
+    if (day?.weight) {
+      setWeightInput(day.weight.toString());
+    } else {
+      setWeightInput("");
+    }
+  }, [day?.weight]);
 
   // Handle navigation
   const goToPrev = () => setLocation(`/day/${format(subDays(parseISO(dateStr), 1), "yyyy-MM-dd")}`);
@@ -151,7 +161,8 @@ export default function DailyView() {
                   step="0.01"
                   placeholder="0.00"
                   className="text-2xl font-display font-bold h-16"
-                  value={day?.weight || ''}
+                  value={weightInput}
+                  onChange={(e) => setWeightInput(e.target.value)}
                   onBlur={(e) => {
                     const val = e.target.value;
                     if (val && val !== day?.weight?.toString()) {
