@@ -83,7 +83,13 @@ export default function TrendsView() {
                       boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
                       fontFamily: "var(--font-sans)"
                     }}
-                    labelFormatter={(str) => format(parseISO(str as string), "EEE, MMM d")}
+                    labelFormatter={(str) => {
+                      try {
+                        return typeof str === 'string' ? format(parseISO(str), "EEE, MMM d") : '';
+                      } catch {
+                        return '';
+                      }
+                    }}
                   />
                   <Area 
                     type="monotone" 
@@ -131,7 +137,13 @@ export default function TrendsView() {
                       boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
                       fontFamily: "var(--font-sans)"
                     }}
-                    labelFormatter={(str) => format(parseISO(str as string), "EEE, MMM d")}
+                    labelFormatter={(str) => {
+                      try {
+                        return typeof str === 'string' ? format(parseISO(str), "EEE, MMM d") : '';
+                      } catch {
+                        return '';
+                      }
+                    }}
                   />
                   <Bar 
                     dataKey="calories" 
@@ -161,7 +173,13 @@ export default function TrendsView() {
                   <YAxis hide />
                   <Tooltip 
                     contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)" }} 
-                    labelFormatter={(str) => format(parseISO(str as string), "MMM d")}
+                    labelFormatter={(str) => {
+                      try {
+                        return typeof str === 'string' ? format(parseISO(str), "MMM d") : '';
+                      } catch {
+                        return '';
+                      }
+                    }}
                   />
                   <Line 
                     type="step" 
