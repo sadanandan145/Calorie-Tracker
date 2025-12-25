@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { AddMealDialog } from "@/components/AddMealDialog";
+import { HealthAssistant } from "@/components/HealthAssistant";
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -52,6 +53,7 @@ export default function DailyView() {
   const [match, params] = useRoute("/day/:date");
   const [, setLocation] = useLocation();
   const [weightInput, setWeightInput] = useState("");
+  const [heightInput, setHeightInput] = useState("");
   const dateStr = params?.date || format(new Date(), "yyyy-MM-dd");
   
   const { data: day, isLoading, error } = useDay(dateStr);
@@ -65,14 +67,19 @@ export default function DailyView() {
     }
   }, [day, isLoading, dateStr]);
 
-  // Update weight input when day data changes
+  // Update weight/height inputs when day data changes
   useEffect(() => {
     if (day?.weight) {
       setWeightInput(day.weight.toString());
     } else {
       setWeightInput("");
     }
-  }, [day?.weight]);
+    if (day?.height) {
+      setHeightInput(day.height.toString());
+    } else {
+      setHeightInput("");
+    }
+  }, [day?.weight, day?.height]);
 
   // Handle navigation
   const goToPrev = () => setLocation(`/day/${format(subDays(parseISO(dateStr), 1), "yyyy-MM-dd")}`);
@@ -145,22 +152,33 @@ export default function DailyView() {
           </CardContent>
         </Card>
 
+        {/* HEALTH ASSISTANT */}
+        <HealthAssistant
+          weight={day?.weight ? parseFloat(day.weight.toString()) : undefined}
+          height={day?.height ? parseFloat(day.height.toString()) : undefined}
+          calories={totals.calories}
+          protein={totals.protein}
+          carbs={totals.carbs}
+          fat={totals.fat}
+          fiber={totals.fiber}
+        />
+
         {/* WEIGHT & ACTIVITY */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
                 <CalendarDays className="w-4 h-4" />
-                Weight
+                Weight & Height
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
               <div className="flex items-center gap-2">
                 <Input 
                   type="number"
                   step="0.01"
                   placeholder="0.00"
-                  className="text-2xl font-display font-bold h-16"
+                  className="text-xl font-display font-bold h-12"
                   value={weightInput}
                   onChange={(e) => setWeightInput(e.target.value)}
                   onBlur={(e) => {
@@ -169,8 +187,27 @@ export default function DailyView() {
                       updateDay.mutate({ date: dateStr, weight: val });
                     }
                   }}
+                  data-testid="input-weight"
                 />
-                <span className="text-xl font-medium text-muted-foreground">kg</span>
+                <span className="text-lg font-medium text-muted-foreground">kg</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Input 
+                  type="number"
+                  step="0.1"
+                  placeholder="0"
+                  className="text-xl font-display font-bold h-12"
+                  value={heightInput}
+                  onChange={(e) => setHeightInput(e.target.value)}
+                  onBlur={(e) => {
+                    const val = e.target.value;
+                    if (val && val !== day?.height?.toString()) {
+                      updateDay.mutate({ date: dateStr, height: val });
+                    }
+                  }}
+                  data-testid="input-height"
+                />
+                <span className="text-lg font-medium text-muted-foreground">cm</span>
               </div>
             </CardContent>
           </Card>

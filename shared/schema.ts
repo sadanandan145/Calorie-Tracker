@@ -9,6 +9,7 @@ export const dailyEntries = pgTable("daily_entries", {
   id: serial("id").primaryKey(),
   date: date("date").notNull().unique(), // YYYY-MM-DD
   weight: decimal("weight", { precision: 5, scale: 2 }), // e.g., 85.50
+  height: decimal("height", { precision: 5, scale: 2 }), // in cm, for BMI calculation
   steps: integer("steps").default(0),
   walkingMinutes: integer("walking_minutes").default(0),
   strengthTraining: boolean("strength_training").default(false),
