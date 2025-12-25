@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAddMeal } from "@/hooks/use-tracker";
-import { Plus } from "lucide-react";
+import { Plus, Sparkles } from "lucide-react";
 import { InsertMeal } from "@shared/schema";
+import { api } from "@shared/routes";
 
 interface AddMealDialogProps {
   date: string;
@@ -22,6 +23,7 @@ const MEAL_TYPES = [
 
 export function AddMealDialog({ date, defaultType = "breakfast" }: AddMealDialogProps) {
   const [open, setOpen] = useState(false);
+  const [isCalculating, setIsCalculating] = useState(false);
   const [formData, setFormData] = useState<Partial<InsertMeal>>({
     mealType: defaultType,
     description: "",
@@ -30,9 +32,42 @@ export function AddMealDialog({ date, defaultType = "breakfast" }: AddMealDialog
     protein: 0,
     carbs: 0,
     fat: 0,
+    fiber: 0,
   });
 
   const { mutate, isPending } = useAddMeal(date);
+
+  const handleCalculateNutrition = async () => {
+    if (!formData.description) {
+      alert("Enter a meal description first");
+      return;
+    }
+    setIsCalculating(true);
+    try {
+      const response = await fetch(api.meals.getNutrition.path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          description: formData.description,
+          quantity: formData.quantity,
+        }),
+      });
+      const data = await response.json();
+      setFormData(prev => ({
+        ...prev,
+        calories: data.calories || 0,
+        protein: data.protein || 0,
+        carbs: data.carbs || 0,
+        fat: data.fat || 0,
+        fiber: data.fiber || 0,
+      }));
+    } catch (error) {
+      console.error("Failed to calculate nutrition:", error);
+      alert("Failed to calculate nutrition. Please enter manually.");
+    } finally {
+      setIsCalculating(false);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,11 +81,11 @@ export function AddMealDialog({ date, defaultType = "breakfast" }: AddMealDialog
       protein: Number(formData.protein) || 0,
       carbs: Number(formData.carbs) || 0,
       fat: Number(formData.fat) || 0,
-      fiber: 0,
+      fiber: Number(formData.fiber) || 0,
     }, {
       onSuccess: () => {
         setOpen(false);
-        setFormData({ ...formData, description: "", quantity: "", calories: 0, protein: 0, carbs: 0, fat: 0 });
+        setFormData({ ...formData, description: "", quantity: "", calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 });
       }
     });
   };
@@ -108,6 +143,19 @@ export function AddMealDialog({ date, defaultType = "breakfast" }: AddMealDialog
               />
             </div>
             
+            <div className="col-span-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={handleCalculateNutrition}
+                disabled={isCalculating || !formData.description}
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                {isCalculating ? "Calculating..." : "Auto-Calculate Nutrition"}
+              </Button>
+            </div>
+            
             <div className="col-span-2 sm:col-span-1">
               <Input
                 type="number"
@@ -118,7 +166,7 @@ export function AddMealDialog({ date, defaultType = "breakfast" }: AddMealDialog
               />
             </div>
             
-            <div className="col-span-2 grid grid-cols-3 gap-4">
+            <div className="col-span-2 grid grid-cols-4 gap-3">
                <Input
                 type="number"
                 label="Protein (g)"
@@ -139,6 +187,13 @@ export function AddMealDialog({ date, defaultType = "breakfast" }: AddMealDialog
                 placeholder="0"
                 value={formData.fat || ''}
                 onChange={e => setFormData(prev => ({ ...prev, fat: parseInt(e.target.value) }))}
+              />
+               <Input
+                type="number"
+                label="Fiber (g)"
+                placeholder="0"
+                value={formData.fiber || ''}
+                onChange={e => setFormData(prev => ({ ...prev, fiber: parseInt(e.target.value) }))}
               />
             </div>
           </div>

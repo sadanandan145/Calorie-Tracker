@@ -85,7 +85,8 @@ export default function DailyView() {
     protein: acc.protein + (meal.protein || 0),
     carbs: acc.carbs + (meal.carbs || 0),
     fat: acc.fat + (meal.fat || 0),
-  }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
+    fiber: acc.fiber + (meal.fiber || 0),
+  }), { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 });
 
   return (
     <Layout>
@@ -125,10 +126,11 @@ export default function DailyView() {
               <Flame className="w-12 h-12 text-primary-foreground/20" />
             </div>
 
-            <div className="grid grid-cols-3 gap-2 p-3 bg-black/10 rounded-xl backdrop-blur-sm">
+            <div className="grid grid-cols-4 gap-2 p-3 bg-black/10 rounded-xl backdrop-blur-sm">
               <MacroItem label="Protein" value={totals.protein} unit="g" />
               <MacroItem label="Carbs" value={totals.carbs} unit="g" />
               <MacroItem label="Fat" value={totals.fat} unit="g" />
+              <MacroItem label="Fiber" value={totals.fiber} unit="g" />
             </div>
           </CardContent>
         </Card>
@@ -146,11 +148,16 @@ export default function DailyView() {
               <div className="flex items-center gap-2">
                 <Input 
                   type="number"
-                  step="0.1"
-                  placeholder="0.0"
+                  step="0.01"
+                  placeholder="0.00"
                   className="text-2xl font-display font-bold h-16"
                   value={day?.weight || ''}
-                  onChange={(e) => updateDay.mutate({ date: dateStr, weight: e.target.value })}
+                  onBlur={(e) => {
+                    const val = e.target.value;
+                    if (val && val !== day?.weight?.toString()) {
+                      updateDay.mutate({ date: dateStr, weight: val });
+                    }
+                  }}
                 />
                 <span className="text-xl font-medium text-muted-foreground">kg</span>
               </div>

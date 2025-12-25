@@ -76,6 +76,24 @@ export const api = {
         404: errorSchemas.notFound,
       },
     },
+    getNutrition: {
+      method: 'POST' as const,
+      path: '/api/nutrition-lookup',
+      input: z.object({
+        description: z.string(),
+        quantity: z.string().optional(),
+      }),
+      responses: {
+        200: z.object({
+          calories: z.number(),
+          protein: z.number(),
+          carbs: z.number(),
+          fat: z.number(),
+          fiber: z.number(),
+        }),
+        400: errorSchemas.validation,
+      },
+    },
   },
   trends: {
     get: {

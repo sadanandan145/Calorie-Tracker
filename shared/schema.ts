@@ -70,3 +70,6 @@ export interface TrendDataPoint {
   calories: number;
   protein: number;
 }
+
+// Export chat tables for integration
+export { conversations, messages } from "./models/chat";
