@@ -1,0 +1,91 @@
+I want you to build a SIMPLE, RELIABLE calorie and weight tracking app for Android.
+
+IMPORTANT CONTEXT:
+I am tracking my diet and weight daily.
+I enter data DAY BY DAY and I do NOT want mixing of old days data.
+Each day must be stored separately like a database record.
+
+TECH STACK (choose best simple option):
+- Backend: SQLite or local JSON database
+- Frontend: Android (Kotlin preferred, or React Native if easier)
+- Offline first (no internet required)
+- Data must persist even if app is closed
+
+CORE REQUIREMENTS:
+
+1. DAILY ENTRY SYSTEM (VERY IMPORTANT)
+- User must first select or create a DATE (YYYY-MM-DD)
+- All data entered must be linked ONLY to that date
+- Once saved, data for that date should not mix with other dates
+- Ability to EDIT a specific date without affecting others
+
+2. DATA FIELDS PER DAY
+Each day should store:
+
+A. Weight
+- Morning weight (kg)
+
+B. Meals (with quantities)
+- Breakfast (text + grams/ml)
+- Morning Snack
+- Lunch
+- Evening Snack
+- Dinner
+
+C. Automatic Calculations
+- Calories
+- Protein (g)
+- Carbs (g)
+- Fat (g)
+- Fiber (g)
+
+(Use a basic food nutrition lookup table stored locally.
+Exact perfection not required, but consistency is mandatory.)
+
+D. Activity
+- Steps
+- Walking minutes
+- Strength training (yes/no + notes)
+
+3. DAILY SUMMARY VIEW
+For a selected date, show:
+- Total calories
+- Protein / carbs / fat / fiber
+- Steps
+- Weight
+- Net calorie status (Deficit / Maintenance / Surplus)
+
+4. HISTORY & TRENDS
+- List of all recorded dates
+- Weight trend graph
+- Calories trend graph
+- Average calories & protein for last 7 days
+
+5. DATA SAFETY
+- No overwriting data accidentally
+- Confirm before deleting a day
+- Each day is an independent record
+
+6. UI REQUIREMENTS
+- Very simple UI (no fancy design)
+- Clear sections: Date → Meals → Activity → Summary
+- Manual entry friendly (text + numbers)
+
+7. EXTRA (OPTIONAL BUT NICE)
+- Export data as CSV
+- Backup & restore local data
+
+IMPORTANT RULES FOR YOU (THE AI):
+- Do NOT merge data between days
+- Do NOT auto-carry values from previous days
+- Treat each date as a separate database row
+- Prioritize correctness over fancy features
+
+DELIVERABLES:
+- Working Android app
+- Clear folder structure
+- Explanation of database schema
+- Instructions to run on Android phone (APK or emulator)
+
+This app is for a real person doing serious long-term weight loss tracking.
+Accuracy and day-wise separation matter more than anything else.
