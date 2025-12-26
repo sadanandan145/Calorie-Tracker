@@ -14,13 +14,14 @@ function getUserId(): string {
 // ============================================
 
 export function useDay(date: string) {
+  const userId = getUserId();
   return useQuery({
-    queryKey: [api.days.get.path, date],
+    queryKey: [api.days.get.path, userId, date],
     queryFn: async () => {
       const url = buildUrl(api.days.get.path, { date });
       const res = await fetch(url, { 
         credentials: "include",
-        headers: { 'x-user-id': getUserId() }
+        headers: { 'x-user-id': userId }
       });
       
       if (res.status === 404) return null;
@@ -33,13 +34,14 @@ export function useDay(date: string) {
 
 export function useCreateDay() {
   const queryClient = useQueryClient();
+  const userId = getUserId();
   return useMutation({
     mutationFn: async (date: string) => {
       const res = await fetch(api.days.create.path, {
         method: api.days.create.method,
         headers: { 
           'Content-Type': 'application/json',
-          'x-user-id': getUserId()
+          'x-user-id': userId
         },
         body: JSON.stringify({ date }),
         credentials: "include",
@@ -48,14 +50,15 @@ export function useCreateDay() {
       return api.days.create.responses[201].parse(await res.json());
     },
     onSuccess: (_, date) => {
-      queryClient.invalidateQueries({ queryKey: [api.days.get.path, date] });
-      queryClient.invalidateQueries({ queryKey: [api.trends.get.path] });
+      queryClient.invalidateQueries({ queryKey: [api.days.get.path, userId, date] });
+      queryClient.invalidateQueries({ queryKey: [api.trends.get.path, userId] });
     },
   });
 }
 
 export function useUpdateDay() {
   const queryClient = useQueryClient();
+  const userId = getUserId();
   return useMutation({
     mutationFn: async ({ date, ...updates }: { date: string } & UpdateDailyEntryRequest) => {
       const url = buildUrl(api.days.update.path, { date });
@@ -63,7 +66,7 @@ export function useUpdateDay() {
         method: api.days.update.method,
         headers: { 
           'Content-Type': 'application/json',
-          'x-user-id': getUserId()
+          'x-user-id': userId
         },
         body: JSON.stringify(updates),
         credentials: "include",
@@ -72,8 +75,8 @@ export function useUpdateDay() {
       return api.days.update.responses[200].parse(await res.json());
     },
     onSuccess: (_, { date }) => {
-      queryClient.invalidateQueries({ queryKey: [api.days.get.path, date] });
-      queryClient.invalidateQueries({ queryKey: [api.trends.get.path] });
+      queryClient.invalidateQueries({ queryKey: [api.days.get.path, userId, date] });
+      queryClient.invalidateQueries({ queryKey: [api.trends.get.path, userId] });
     },
   });
 }
@@ -84,6 +87,7 @@ export function useUpdateDay() {
 
 export function useAddMeal(date: string) {
   const queryClient = useQueryClient();
+  const userId = getUserId();
   return useMutation({
     mutationFn: async (meal: CreateMealRequest) => {
       const url = buildUrl(api.meals.create.path, { date });
@@ -91,7 +95,7 @@ export function useAddMeal(date: string) {
         method: api.meals.create.method,
         headers: { 
           'Content-Type': 'application/json',
-          'x-user-id': getUserId()
+          'x-user-id': userId
         },
         body: JSON.stringify(meal),
         credentials: "include",
@@ -100,27 +104,28 @@ export function useAddMeal(date: string) {
       return api.meals.create.responses[201].parse(await res.json());
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [api.days.get.path, date] });
-      queryClient.invalidateQueries({ queryKey: [api.trends.get.path] });
+      queryClient.invalidateQueries({ queryKey: [api.days.get.path, userId, date] });
+      queryClient.invalidateQueries({ queryKey: [api.trends.get.path, userId] });
     },
   });
 }
 
 export function useDeleteMeal() {
   const queryClient = useQueryClient();
+  const userId = getUserId();
   return useMutation({
     mutationFn: async ({ id, date }: { id: number, date: string }) => {
       const url = buildUrl(api.meals.delete.path, { id });
       const res = await fetch(url, { 
         method: api.meals.delete.method,
-        headers: { 'x-user-id': getUserId() },
+        headers: { 'x-user-id': userId },
         credentials: "include" 
       });
       if (!res.ok) throw new Error('Failed to delete meal');
     },
     onSuccess: (_, { date }) => {
-      queryClient.invalidateQueries({ queryKey: [api.days.get.path, date] });
-      queryClient.invalidateQueries({ queryKey: [api.trends.get.path] });
+      queryClient.invalidateQueries({ queryKey: [api.days.get.path, userId, date] });
+      queryClient.invalidateQueries({ queryKey: [api.trends.get.path, userId] });
     },
   });
 }
@@ -130,12 +135,13 @@ export function useDeleteMeal() {
 // ============================================
 
 export function useTrends() {
+  const userId = getUserId();
   return useQuery({
-    queryKey: [api.trends.get.path],
+    queryKey: [api.trends.get.path, userId],
     queryFn: async () => {
       const res = await fetch(api.trends.get.path, { 
         credentials: "include",
-        headers: { 'x-user-id': getUserId() }
+        headers: { 'x-user-id': userId }
       });
       if (!res.ok) throw new Error('Failed to fetch trends');
       return api.trends.get.responses[200].parse(await res.json());
