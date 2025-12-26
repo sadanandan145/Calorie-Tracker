@@ -54,7 +54,6 @@ export default function DailyView() {
   const [, setLocation] = useLocation();
   const [weightInput, setWeightInput] = useState("");
   const [stepsInput, setStepsInput] = useState("");
-  const [isEditingSteps, setIsEditingSteps] = useState(false);
   const dateStr = params?.date || format(new Date(), "yyyy-MM-dd");
   
   const { data: day, isLoading, error } = useDay(dateStr);
@@ -202,51 +201,24 @@ export default function DailyView() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {!isEditingSteps ? (
-                <div 
-                  onClick={() => {
-                    setIsEditingSteps(true);
-                    setStepsInput((day?.steps || 0).toString());
+              <div className="flex items-center gap-2">
+                <Input 
+                  type="number"
+                  placeholder="0"
+                  className="text-2xl font-display font-bold h-16"
+                  value={stepsInput}
+                  onChange={(e) => setStepsInput(e.target.value)}
+                  onBlur={(e) => {
+                    const val = e.target.value;
+                    const numVal = parseInt(val) || 0;
+                    if (numVal >= 0 && val !== day?.steps?.toString()) {
+                      updateDay.mutate({ date: dateStr, steps: numVal });
+                    }
                   }}
-                  className="text-2xl font-display font-bold h-16 cursor-pointer px-3 py-2 rounded-lg bg-muted/50 hover:bg-muted flex items-center transition-colors"
-                  data-testid="display-steps"
-                >
-                  {day?.steps || 0}
-                </div>
-              ) : (
-                <div className="flex gap-2">
-                  <Input 
-                    type="number"
-                    placeholder="0"
-                    className="text-2xl font-display font-bold h-16"
-                    value={stepsInput}
-                    onChange={(e) => setStepsInput(e.target.value)}
-                    autoFocus
-                    data-testid="input-steps"
-                  />
-                  <Button 
-                    size="sm"
-                    onClick={() => {
-                      const val = parseInt(stepsInput) || 0;
-                      if (val >= 0) {
-                        updateDay.mutate({ date: dateStr, steps: val });
-                        setIsEditingSteps(false);
-                      }
-                    }}
-                    data-testid="button-save-steps"
-                  >
-                    <Check className="w-4 h-4" />
-                  </Button>
-                  <Button 
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setIsEditingSteps(false)}
-                    data-testid="button-cancel-steps"
-                  >
-                    ✕
-                  </Button>
-                </div>
-              )}
+                  data-testid="input-steps"
+                />
+                <span className="text-xl font-medium text-muted-foreground">steps</span>
+              </div>
             </CardContent>
           </Card>
         </div>
