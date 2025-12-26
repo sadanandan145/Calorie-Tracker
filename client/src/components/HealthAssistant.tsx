@@ -9,7 +9,6 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 
 interface HealthAssistantProps {
   weight?: number;
-  height?: number;
   calories: number;
   protein: number;
   carbs: number;
@@ -19,7 +18,6 @@ interface HealthAssistantProps {
 
 export function HealthAssistant({
   weight,
-  height,
   calories,
   protein,
   carbs,
@@ -31,8 +29,13 @@ export function HealthAssistant({
   const [input, setInput] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
+  // Get height from profile (localStorage)
+  const profileHeight = localStorage.getItem("profile")
+    ? JSON.parse(localStorage.getItem("profile") || "{}").height
+    : null;
+
   // Calculate BMI
-  const bmi = height && weight ? (weight / (height / 100) ** 2).toFixed(1) : null;
+  const bmi = profileHeight && weight ? (weight / (profileHeight / 100) ** 2).toFixed(1) : null;
   const getBmiStatus = (bmi: number) => {
     if (bmi < 18.5) return { status: "Underweight", color: "text-blue-500" };
     if (bmi < 25) return { status: "Normal", color: "text-green-500" };

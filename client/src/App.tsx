@@ -6,6 +6,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { format } from "date-fns";
 import DailyView from "@/pages/DailyView";
 import TrendsView from "@/pages/TrendsView";
+import SettingsView from "@/pages/SettingsView";
+import LoginView from "@/pages/LoginView";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -16,6 +18,8 @@ function Router() {
       <Route path="/" component={() => <Redirect to={`/day/${today}`} />} />
       <Route path="/day/:date" component={DailyView} />
       <Route path="/trends" component={TrendsView} />
+      <Route path="/settings" component={SettingsView} />
+      <Route path="/login" component={LoginView} />
       <Route component={NotFound} />
     </Switch>
   );

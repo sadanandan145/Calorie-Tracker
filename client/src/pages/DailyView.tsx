@@ -53,7 +53,8 @@ export default function DailyView() {
   const [match, params] = useRoute("/day/:date");
   const [, setLocation] = useLocation();
   const [weightInput, setWeightInput] = useState("");
-  const [heightInput, setHeightInput] = useState("");
+  const [stepsInput, setStepsInput] = useState("");
+  const [isEditingSteps, setIsEditingSteps] = useState(false);
   const dateStr = params?.date || format(new Date(), "yyyy-MM-dd");
   
   const { data: day, isLoading, error } = useDay(dateStr);
@@ -67,19 +68,19 @@ export default function DailyView() {
     }
   }, [day, isLoading, dateStr]);
 
-  // Update weight/height inputs when day data changes
+  // Update weight/steps inputs when day data changes
   useEffect(() => {
     if (day?.weight) {
       setWeightInput(day.weight.toString());
     } else {
       setWeightInput("");
     }
-    if (day?.height) {
-      setHeightInput(day.height.toString());
+    if (day?.steps) {
+      setStepsInput(day.steps.toString());
     } else {
-      setHeightInput("");
+      setStepsInput("");
     }
-  }, [day?.weight, day?.height]);
+  }, [day?.weight, day?.steps]);
 
   // Handle navigation
   const goToPrev = () => setLocation(`/day/${format(subDays(parseISO(dateStr), 1), "yyyy-MM-dd")}`);
@@ -155,7 +156,6 @@ export default function DailyView() {
         {/* HEALTH ASSISTANT */}
         <HealthAssistant
           weight={day?.weight ? parseFloat(day.weight.toString()) : undefined}
-          height={day?.height ? parseFloat(day.height.toString()) : undefined}
           calories={totals.calories}
           protein={totals.protein}
           carbs={totals.carbs}
@@ -163,22 +163,22 @@ export default function DailyView() {
           fiber={totals.fiber}
         />
 
-        {/* WEIGHT & ACTIVITY */}
+        {/* WEIGHT & STEPS */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
                 <CalendarDays className="w-4 h-4" />
-                Weight & Height
+                Weight
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent>
               <div className="flex items-center gap-2">
                 <Input 
                   type="number"
                   step="0.01"
                   placeholder="0.00"
-                  className="text-xl font-display font-bold h-12"
+                  className="text-2xl font-display font-bold h-16"
                   value={weightInput}
                   onChange={(e) => setWeightInput(e.target.value)}
                   onBlur={(e) => {
@@ -189,44 +189,64 @@ export default function DailyView() {
                   }}
                   data-testid="input-weight"
                 />
-                <span className="text-lg font-medium text-muted-foreground">kg</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Input 
-                  type="number"
-                  step="0.1"
-                  placeholder="0"
-                  className="text-xl font-display font-bold h-12"
-                  value={heightInput}
-                  onChange={(e) => setHeightInput(e.target.value)}
-                  onBlur={(e) => {
-                    const val = e.target.value;
-                    if (val && val !== day?.height?.toString()) {
-                      updateDay.mutate({ date: dateStr, height: val });
-                    }
-                  }}
-                  data-testid="input-height"
-                />
-                <span className="text-lg font-medium text-muted-foreground">cm</span>
+                <span className="text-xl font-medium text-muted-foreground">kg</span>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-             <CardHeader className="pb-3">
+            <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
                 <Footprints className="w-4 h-4" />
                 Steps
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <Input 
-                type="number"
-                placeholder="0"
-                className="text-lg font-medium h-16"
-                value={day?.steps || ''}
-                onChange={(e) => updateDay.mutate({ date: dateStr, steps: parseInt(e.target.value) || 0 })}
-              />
+              {!isEditingSteps ? (
+                <div 
+                  onClick={() => {
+                    setIsEditingSteps(true);
+                    setStepsInput((day?.steps || 0).toString());
+                  }}
+                  className="text-2xl font-display font-bold h-16 cursor-pointer px-3 py-2 rounded-lg bg-muted/50 hover:bg-muted flex items-center transition-colors"
+                  data-testid="display-steps"
+                >
+                  {day?.steps || 0}
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <Input 
+                    type="number"
+                    placeholder="0"
+                    className="text-2xl font-display font-bold h-16"
+                    value={stepsInput}
+                    onChange={(e) => setStepsInput(e.target.value)}
+                    autoFocus
+                    data-testid="input-steps"
+                  />
+                  <Button 
+                    size="sm"
+                    onClick={() => {
+                      const val = parseInt(stepsInput) || 0;
+                      if (val >= 0) {
+                        updateDay.mutate({ date: dateStr, steps: val });
+                        setIsEditingSteps(false);
+                      }
+                    }}
+                    data-testid="button-save-steps"
+                  >
+                    <Check className="w-4 h-4" />
+                  </Button>
+                  <Button 
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setIsEditingSteps(false)}
+                    data-testid="button-cancel-steps"
+                  >
+                    ✕
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
