@@ -3,17 +3,21 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
-import { Activity, ChevronLeft } from "lucide-react";
+import { Activity } from "lucide-react";
+import { format } from "date-fns";
 
 export default function LoginView() {
   const [, setLocation] = useLocation();
-  const [mode, setMode] = useState<"login" | "signup">("login");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleDemoLogin = () => {
-    // For now, just redirect to app
-    setLocation("/trends");
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (username.trim()) {
+      setIsLoading(true);
+      localStorage.setItem("user", JSON.stringify({ username: username.trim() }));
+      setLocation(`/day/${format(new Date(), "yyyy-MM-dd")}`);
+    }
   };
 
   return (
@@ -32,74 +36,34 @@ export default function LoginView() {
         </CardHeader>
 
         <CardContent className="space-y-4">
-          {/* Demo Banner */}
-          <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800">
-            <p className="text-sm text-blue-900 dark:text-blue-100">
-              <span className="font-semibold">Free Tier:</span> Auth system coming soon. Try the demo to explore.
-            </p>
-          </div>
+          <form onSubmit={handleLogin} className="space-y-4">
+            {/* Username */}
+            <div>
+              <label className="text-sm font-medium mb-2 block">Enter your name</label>
+              <Input
+                type="text"
+                placeholder="e.g., John"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                autoFocus
+                data-testid="input-username"
+              />
+            </div>
 
-          {/* Email */}
-          <div>
-            <label className="text-sm font-medium mb-1 block">Email</label>
-            <Input
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled
-              className="opacity-50"
-              data-testid="input-login-email"
-            />
-            <p className="text-xs text-muted-foreground mt-1">Coming in next update</p>
-          </div>
-
-          {/* Password */}
-          <div>
-            <label className="text-sm font-medium mb-1 block">Password</label>
-            <Input
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled
-              className="opacity-50"
-              data-testid="input-login-password"
-            />
-          </div>
-
-          {/* Demo Button */}
-          <Button 
-            onClick={handleDemoLogin}
-            className="w-full"
-            data-testid="button-try-demo"
-          >
-            Try Demo
-          </Button>
-
-          {/* Toggle Mode */}
-          <div className="text-center text-sm">
-            <button
-              onClick={() => setMode(mode === "login" ? "signup" : "login")}
-              className="text-primary hover:underline"
-              disabled
+            {/* Login Button */}
+            <Button 
+              type="submit"
+              className="w-full"
+              disabled={!username.trim() || isLoading}
+              data-testid="button-login"
             >
-              {mode === "login"
-                ? "Don't have an account? Sign up"
-                : "Already have an account? Log in"}
-            </button>
-          </div>
+              {isLoading ? "Logging in..." : "Get Started"}
+            </Button>
+          </form>
 
-          {/* Back Button */}
-          <Button 
-            variant="outline" 
-            className="w-full gap-2"
-            onClick={() => setLocation("/trends")}
-            data-testid="button-back-login"
-          >
-            <ChevronLeft className="w-4 h-4" />
-            Back to App
-          </Button>
+          <div className="text-xs text-center text-muted-foreground">
+            Your data is stored locally on this device
+          </div>
         </CardContent>
       </Card>
     </div>
