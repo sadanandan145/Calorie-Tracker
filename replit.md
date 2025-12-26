@@ -19,6 +19,8 @@ Preferred communication style: Simple, everyday language.
 - **Charts**: Recharts for visualizing weight and calorie trends
 - **Animations**: Framer Motion for page transitions and micro-interactions
 - **Build Tool**: Vite with React plugin
+- **Pages**: DailyView (tracking), TrendsView (analytics), SettingsView (profile), LoginView (auth placeholder)
+- **Local Storage**: Profile data (height, username) stored in browser
 
 ### Backend Architecture
 - **Runtime**: Node.js with Express
@@ -33,13 +35,22 @@ Preferred communication style: Simple, everyday language.
 - **Schema Location**: `shared/schema.ts` contains all table definitions
 
 ### Key Data Models
-1. **Daily Entries** (`daily_entries` table): Stores per-day records including weight, height, steps, walking minutes, and strength training data
+1. **Daily Entries** (`daily_entries` table): Stores per-day records including weight, steps, walking minutes, and strength training data
 2. **Meals** (`meals` table): Linked to daily entries via `dailyEntryId`, stores meal type, description, quantity, and nutritional values (calories, protein, carbs, fat, fiber)
+3. **Profile** (localStorage): User preferences (height for BMI calculation, username)
 
 ### Date Handling
 - Uses `YYYY-MM-DD` string format for date identification to avoid timezone issues
 - Each day functions as a unique record with strict date separation
 - Frontend defaults to navigating to current day on root path
+
+### Recent Changes (Latest Session)
+- **Steps Editing**: Made steps editable with same inline UX as weight (edit on blur, save automatically)
+- **Height Migration**: Removed from daily entries, now stored as profile-level field in localStorage
+- **Multi-User Prep**: Added `userId` field placeholder in schema (commented, for future implementation)
+- **New Pages**: Created SettingsView (for height/profile settings) and LoginView (placeholder UI for auth)
+- **Profile Storage**: Height stored locally in browser (localStorage) for BMI calculations in HealthAssistant
+- **UI Improvements**: Steps input field now uses flex-1 to properly display 5+ digit numbers
 
 ### AI Integration
 - OpenAI integration for automatic nutrition calculation from meal descriptions

@@ -205,7 +205,7 @@ export default function DailyView() {
                 <Input 
                   type="number"
                   placeholder="0"
-                  className="text-2xl font-display font-bold h-16"
+                  className="flex-1 text-2xl font-display font-bold h-16"
                   value={stepsInput}
                   onChange={(e) => setStepsInput(e.target.value)}
                   onBlur={(e) => {
@@ -217,7 +217,7 @@ export default function DailyView() {
                   }}
                   data-testid="input-steps"
                 />
-                <span className="text-xl font-medium text-muted-foreground">steps</span>
+                <span className="text-xl font-medium text-muted-foreground whitespace-nowrap">steps</span>
               </div>
             </CardContent>
           </Card>
