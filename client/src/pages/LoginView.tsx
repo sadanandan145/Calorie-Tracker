@@ -31,7 +31,7 @@ export default function LoginView() {
           </div>
           <CardTitle className="text-2xl">Health Tracker</CardTitle>
           <p className="text-sm text-muted-foreground">
-            {mode === "login" ? "Welcome back" : "Get started tracking"}
+            Start tracking your health
           </p>
         </CardHeader>
 
