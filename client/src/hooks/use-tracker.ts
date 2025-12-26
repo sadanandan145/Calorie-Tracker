@@ -2,21 +2,27 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, buildUrl, type DailyEntryResponse, type CreateMealRequest, type UpdateDailyEntryRequest, type TrendDataPoint } from "@shared/routes";
 import { format } from "date-fns";
 
+// Helper to get userId from localStorage
+function getUserId(): string {
+  const user = localStorage.getItem("user");
+  if (!user) throw new Error("Not logged in");
+  return JSON.parse(user).username;
+}
+
 // ============================================
 // DAILY ENTRIES
 // ============================================
 
 export function useDay(date: string) {
-  // Ensure we fetch even if the day doesn't exist yet (API should handle 404 or return default)
-  // However, our API returns 404 if not found. We might want to handle that gracefully in UI 
-  // or auto-create. For this app, the UI will likely check query.error or query.data
   return useQuery({
     queryKey: [api.days.get.path, date],
     queryFn: async () => {
       const url = buildUrl(api.days.get.path, { date });
-      const res = await fetch(url, { credentials: "include" });
+      const res = await fetch(url, { 
+        credentials: "include",
+        headers: { 'x-user-id': getUserId() }
+      });
       
-      // If 404, we return null to signal "not created yet"
       if (res.status === 404) return null;
       if (!res.ok) throw new Error('Failed to fetch day');
       
@@ -31,7 +37,10 @@ export function useCreateDay() {
     mutationFn: async (date: string) => {
       const res = await fetch(api.days.create.path, {
         method: api.days.create.method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-user-id': getUserId()
+        },
         body: JSON.stringify({ date }),
         credentials: "include",
       });
@@ -52,7 +61,10 @@ export function useUpdateDay() {
       const url = buildUrl(api.days.update.path, { date });
       const res = await fetch(url, {
         method: api.days.update.method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-user-id': getUserId()
+        },
         body: JSON.stringify(updates),
         credentials: "include",
       });
@@ -77,7 +89,10 @@ export function useAddMeal(date: string) {
       const url = buildUrl(api.meals.create.path, { date });
       const res = await fetch(url, {
         method: api.meals.create.method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-user-id': getUserId()
+        },
         body: JSON.stringify(meal),
         credentials: "include",
       });
@@ -97,7 +112,8 @@ export function useDeleteMeal() {
     mutationFn: async ({ id, date }: { id: number, date: string }) => {
       const url = buildUrl(api.meals.delete.path, { id });
       const res = await fetch(url, { 
-        method: api.meals.delete.method, 
+        method: api.meals.delete.method,
+        headers: { 'x-user-id': getUserId() },
         credentials: "include" 
       });
       if (!res.ok) throw new Error('Failed to delete meal');
@@ -117,7 +133,10 @@ export function useTrends() {
   return useQuery({
     queryKey: [api.trends.get.path],
     queryFn: async () => {
-      const res = await fetch(api.trends.get.path, { credentials: "include" });
+      const res = await fetch(api.trends.get.path, { 
+        credentials: "include",
+        headers: { 'x-user-id': getUserId() }
+      });
       if (!res.ok) throw new Error('Failed to fetch trends');
       return api.trends.get.responses[200].parse(await res.json());
     },
