@@ -54,6 +54,8 @@ export default function DailyView() {
   const [, setLocation] = useLocation();
   const [weightInput, setWeightInput] = useState("");
   const [stepsInput, setStepsInput] = useState("");
+  const [heightInput, setHeightInput] = useState("");
+  const [isEditingHeight, setIsEditingHeight] = useState(false);
   const dateStr = params?.date || format(new Date(), "yyyy-MM-dd");
   
   const { data: day, isLoading, error } = useDay(dateStr);
@@ -66,6 +68,17 @@ export default function DailyView() {
       createDay.mutate(dateStr);
     }
   }, [day, isLoading, dateStr]);
+
+  // Load height from localStorage
+  useEffect(() => {
+    const profile = localStorage.getItem("profile");
+    if (profile) {
+      const parsed = JSON.parse(profile);
+      if (parsed.height) {
+        setHeightInput(parsed.height.toString());
+      }
+    }
+  }, []);
 
   // Update weight/steps inputs when day data changes
   useEffect(() => {
@@ -127,6 +140,74 @@ export default function DailyView() {
       </header>
 
       <div className="space-y-6">
+        {/* HEIGHT DISPLAY */}
+        <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-muted/50 border border-border/50">
+          {!isEditingHeight ? (
+            <>
+              <span className="text-sm text-muted-foreground">Height:</span>
+              <button
+                onClick={() => setIsEditingHeight(true)}
+                className="text-base font-medium hover:text-primary transition-colors cursor-pointer"
+                data-testid="button-edit-height"
+              >
+                {heightInput || "Not set"} cm
+              </button>
+              <button
+                onClick={() => setLocation("/settings")}
+                className="text-xs text-muted-foreground hover:text-primary underline ml-auto"
+                data-testid="link-profile-settings"
+              >
+                Profile
+              </button>
+            </>
+          ) : (
+            <div className="flex items-center gap-2 w-full">
+              <span className="text-sm text-muted-foreground">Height:</span>
+              <Input
+                type="number"
+                placeholder="170"
+                value={heightInput}
+                onChange={(e) => setHeightInput(e.target.value)}
+                autoFocus
+                className="h-8 text-sm"
+                data-testid="input-height-inline"
+              />
+              <span className="text-sm text-muted-foreground">cm</span>
+              <Button
+                size="sm"
+                onClick={() => {
+                  if (heightInput) {
+                    const profile = JSON.parse(localStorage.getItem("profile") || "{}");
+                    localStorage.setItem("profile", JSON.stringify({
+                      ...profile,
+                      height: parseFloat(heightInput)
+                    }));
+                  }
+                  setIsEditingHeight(false);
+                }}
+                data-testid="button-save-height-inline"
+              >
+                Save
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setIsEditingHeight(false);
+                  const profile = localStorage.getItem("profile");
+                  if (profile) {
+                    const parsed = JSON.parse(profile);
+                    setHeightInput(parsed.height?.toString() || "");
+                  }
+                }}
+                data-testid="button-cancel-height-inline"
+              >
+                Cancel
+              </Button>
+            </div>
+          )}
+        </div>
+
         {/* SUMMARY CARD */}
         <Card className="bg-primary text-primary-foreground border-none shadow-xl shadow-primary/30 overflow-hidden relative">
           <div className="absolute top-0 right-0 p-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
