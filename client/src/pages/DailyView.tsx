@@ -56,7 +56,15 @@ export default function DailyView() {
   const [stepsInput, setStepsInput] = useState("");
   const [heightInput, setHeightInput] = useState("");
   const [isEditingHeight, setIsEditingHeight] = useState(false);
-  const dateStr = params?.date || format(new Date(), "yyyy-MM-dd");
+  const today = format(new Date(), "yyyy-MM-dd");
+  const dateStr = params?.date || today;
+
+  // Redirect to today if the route date doesn't match today's date
+  useEffect(() => {
+    if (dateStr !== today) {
+      setLocation(`/day/${today}`);
+    }
+  }, [today, dateStr, setLocation]);
   
   const { data: day, isLoading, error } = useDay(dateStr);
   const createDay = useCreateDay();

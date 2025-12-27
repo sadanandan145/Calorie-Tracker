@@ -1,4 +1,4 @@
-import { Switch, Route, Redirect } from "wouter";
+import { Switch, Route, Redirect, useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -12,8 +12,8 @@ import LoginView from "@/pages/LoginView";
 import NotFound from "@/pages/not-found";
 
 function Router() {
-  const today = format(new Date(), "yyyy-MM-dd");
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const [, setLocation] = useLocation();
 
   useEffect(() => {
     const user = localStorage.getItem("user");
@@ -42,9 +42,27 @@ function Router() {
     }
   }, []);
 
+  // When logged in, ensure we're on today's date
+  useEffect(() => {
+    if (isLoggedIn === true) {
+      const today = format(new Date(), "yyyy-MM-dd");
+      const currentLocation = window.location.pathname;
+      
+      // If on a day route but not today, redirect to today
+      if (currentLocation.startsWith("/day/")) {
+        const dateMatch = currentLocation.match(/\/day\/(\d{4}-\d{2}-\d{2})/);
+        if (dateMatch && dateMatch[1] !== today) {
+          setLocation(`/day/${today}`);
+        }
+      }
+    }
+  }, [isLoggedIn, setLocation]);
+
   if (isLoggedIn === null) {
     return <div className="min-h-screen bg-background flex items-center justify-center" />;
   }
+
+  const today = format(new Date(), "yyyy-MM-dd");
 
   return (
     <Switch>
