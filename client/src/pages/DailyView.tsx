@@ -71,11 +71,20 @@ export default function DailyView() {
 
   // Load height from localStorage
   useEffect(() => {
-    const profile = localStorage.getItem("profile");
-    if (profile) {
-      const parsed = JSON.parse(profile);
-      if (parsed.height) {
-        setHeightInput(parsed.height.toString());
+    const user = localStorage.getItem("user");
+    if (user) {
+      try {
+        const parsedUser = JSON.parse(user);
+        const profileKey = `profile_${parsedUser.username}`;
+        const profile = localStorage.getItem(profileKey);
+        if (profile) {
+          const parsed = JSON.parse(profile);
+          if (parsed.height) {
+            setHeightInput(parsed.height.toString());
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load profile:", err);
       }
     }
   }, []);
@@ -177,11 +186,20 @@ export default function DailyView() {
                 size="sm"
                 onClick={() => {
                   if (heightInput) {
-                    const profile = JSON.parse(localStorage.getItem("profile") || "{}");
-                    localStorage.setItem("profile", JSON.stringify({
-                      ...profile,
-                      height: parseFloat(heightInput)
-                    }));
+                    const user = localStorage.getItem("user");
+                    if (user) {
+                      try {
+                        const parsedUser = JSON.parse(user);
+                        const profileKey = `profile_${parsedUser.username}`;
+                        const profile = JSON.parse(localStorage.getItem(profileKey) || "{}");
+                        localStorage.setItem(profileKey, JSON.stringify({
+                          ...profile,
+                          height: parseFloat(heightInput)
+                        }));
+                      } catch (err) {
+                        console.error("Failed to save height:", err);
+                      }
+                    }
                   }
                   setIsEditingHeight(false);
                 }}
@@ -194,10 +212,19 @@ export default function DailyView() {
                 variant="outline"
                 onClick={() => {
                   setIsEditingHeight(false);
-                  const profile = localStorage.getItem("profile");
-                  if (profile) {
-                    const parsed = JSON.parse(profile);
-                    setHeightInput(parsed.height?.toString() || "");
+                  const user = localStorage.getItem("user");
+                  if (user) {
+                    try {
+                      const parsedUser = JSON.parse(user);
+                      const profileKey = `profile_${parsedUser.username}`;
+                      const profile = localStorage.getItem(profileKey);
+                      if (profile) {
+                        const parsed = JSON.parse(profile);
+                        setHeightInput(parsed.height?.toString() || "");
+                      }
+                    } catch (err) {
+                      console.error("Failed to load height:", err);
+                    }
                   }
                 }}
                 data-testid="button-cancel-height-inline"

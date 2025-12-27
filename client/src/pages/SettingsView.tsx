@@ -14,16 +14,30 @@ export default function SettingsView() {
 
   // Load profile from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem("profile");
-    if (saved) {
-      setProfile(JSON.parse(saved));
+    const user = localStorage.getItem("user");
+    if (user) {
+      try {
+        const parsedUser = JSON.parse(user);
+        const profileKey = `profile_${parsedUser.username}`;
+        const saved = localStorage.getItem(profileKey);
+        if (saved) {
+          setProfile(JSON.parse(saved));
+        }
+      } catch (err) {
+        console.error("Failed to load profile:", err);
+      }
     }
   }, []);
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      localStorage.setItem("profile", JSON.stringify(profile));
+      const user = localStorage.getItem("user");
+      if (user) {
+        const parsedUser = JSON.parse(user);
+        const profileKey = `profile_${parsedUser.username}`;
+        localStorage.setItem(profileKey, JSON.stringify(profile));
+      }
       setTimeout(() => setIsSaving(false), 300);
     } catch (err) {
       console.error("Failed to save profile:", err);

@@ -30,9 +30,19 @@ export function HealthAssistant({
   const [isOpen, setIsOpen] = useState(false);
 
   // Get height from profile (localStorage)
-  const profileHeight = localStorage.getItem("profile")
-    ? JSON.parse(localStorage.getItem("profile") || "{}").height
-    : null;
+  const getProfileHeight = () => {
+    const user = localStorage.getItem("user");
+    if (!user) return null;
+    try {
+      const parsedUser = JSON.parse(user);
+      const profileKey = `profile_${parsedUser.username}`;
+      const profile = localStorage.getItem(profileKey);
+      return profile ? JSON.parse(profile).height : null;
+    } catch {
+      return null;
+    }
+  };
+  const profileHeight = getProfileHeight();
 
   // Calculate BMI
   const bmi = profileHeight && weight ? (weight / (profileHeight / 100) ** 2).toFixed(1) : null;

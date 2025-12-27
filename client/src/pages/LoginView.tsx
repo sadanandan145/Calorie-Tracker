@@ -15,7 +15,8 @@ export default function LoginView() {
     e.preventDefault();
     if (username.trim()) {
       setIsLoading(true);
-      localStorage.setItem("user", JSON.stringify({ username: username.trim() }));
+      const normalizedUsername = username.trim().toLowerCase();
+      localStorage.setItem("user", JSON.stringify({ username: normalizedUsername }));
       setLocation(`/day/${format(new Date(), "yyyy-MM-dd")}`);
     }
   };
