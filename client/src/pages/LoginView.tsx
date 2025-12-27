@@ -23,6 +23,7 @@ export default function LoginView() {
   const [, setLocation] = useLocation();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -71,6 +72,17 @@ export default function LoginView() {
 
       // Login successful
       localStorage.setItem("user", JSON.stringify({ username: normalizedUsername }));
+      
+      // Save remember me preference
+      if (rememberMe) {
+        localStorage.setItem("rememberMe", JSON.stringify({ 
+          username: normalizedUsername,
+          enabled: true 
+        }));
+      } else {
+        localStorage.removeItem("rememberMe");
+      }
+      
       setLocation(`/day/${format(new Date(), "yyyy-MM-dd")}`);
     } catch (err) {
       setError("Login failed. Please try again.");
@@ -135,6 +147,22 @@ export default function LoginView() {
               <p className="text-xs text-muted-foreground mt-1">
                 First login creates your account
               </p>
+            </div>
+
+            {/* Remember Me Checkbox */}
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="remember-me"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                disabled={isLoading}
+                data-testid="checkbox-remember-me"
+                className="rounded"
+              />
+              <label htmlFor="remember-me" className="text-sm cursor-pointer">
+                Remember me
+              </label>
             </div>
 
             {/* Login Button */}

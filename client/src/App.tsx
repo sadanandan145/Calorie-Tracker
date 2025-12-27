@@ -17,7 +17,29 @@ function Router() {
 
   useEffect(() => {
     const user = localStorage.getItem("user");
-    setIsLoggedIn(!!user);
+    
+    if (user) {
+      setIsLoggedIn(true);
+    } else {
+      // Check if remember me is enabled for auto-login
+      const rememberMeData = localStorage.getItem("rememberMe");
+      if (rememberMeData) {
+        try {
+          const { username, enabled } = JSON.parse(rememberMeData);
+          if (enabled && username) {
+            // Auto-login
+            localStorage.setItem("user", JSON.stringify({ username }));
+            setIsLoggedIn(true);
+          } else {
+            setIsLoggedIn(false);
+          }
+        } catch {
+          setIsLoggedIn(false);
+        }
+      } else {
+        setIsLoggedIn(false);
+      }
+    }
   }, []);
 
   if (isLoggedIn === null) {
