@@ -61,14 +61,23 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createMeal(userId: string, meal: InsertMeal): Promise<DailyEntryResponse> {
+    // Verify the daily entry belongs to this user
+    const [entry] = await db.select().from(dailyEntries).where(and(eq(dailyEntries.id, meal.dailyEntryId), eq(dailyEntries.userId, userId)));
+    if (!entry) throw new Error("Daily entry not found or unauthorized");
+    
     await db.insert(meals).values(meal);
     
-    // Fetch updated daily entry to return
-    const [entry] = await db.select().from(dailyEntries).where(eq(dailyEntries.id, meal.dailyEntryId));
     return this.getDailyEntry(userId, entry.date) as Promise<DailyEntryResponse>;
   }
 
   async deleteMeal(userId: string, id: number): Promise<void> {
+    // Verify the meal belongs to a daily entry owned by this user
+    const [meal] = await db.select({ mealId: meals.id }).from(meals)
+      .innerJoin(dailyEntries, eq(meals.dailyEntryId, dailyEntries.id))
+      .where(and(eq(meals.id, id), eq(dailyEntries.userId, userId)))
+      .limit(1);
+    
+    if (!meal) throw new Error("Meal not found or unauthorized");
     await db.delete(meals).where(eq(meals.id, id));
   }
 
